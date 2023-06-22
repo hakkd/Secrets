@@ -5,7 +5,8 @@ import express from "express";
 import ejs from "ejs";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import md5 from "md5";
+import bcrypt from "bcrypt";
+const saltRounds = 10;
 
 const app = express();
 
@@ -51,13 +52,17 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-    const newUser = new User({
-        email: req.body.username,
-        password: md5(req.body.password),
-    });
+    bcrypt.hash(req.body.password, saltRounds)
+        .then((hash) => {
+            const newUser = new User({
+                email: req.body.username,
+                password: hash,
+                });
 
-    newUser.save()
-        .then(() => {res.render("secrets")})
+            newUser.save()
+                .then(() => {res.render("secrets")})
+                .catch(err => {console.log(err)});
+        })
         .catch(err => {console.log(err)});
 });
 
