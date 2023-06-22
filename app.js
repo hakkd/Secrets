@@ -42,13 +42,14 @@ app.post("/login", (req, res) => {
     User.findOne({email: username})
         .then((foundUser) => {
             if (foundUser) {
-                if (foundUser.password === password) {
-                    res.render("secrets");
-                }
-            }
-        })
-        .catch((err) => {console.log(err)});
-
+                bcrypt.compare(password, foundUser.password)
+                    .then((result) => {
+                        if (result === true) {
+                            res.render("secrets");
+                        }})
+                        .catch((error) => {console.log(error);});
+                    }
+                });
 });
 
 app.post("/register", (req, res) => {
